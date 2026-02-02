@@ -1,0 +1,25 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Project | Dynamo DB Datastore
+Resources:
+  ProjectBagCheckTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: project_checked_bags
+      AttributeDefinitions:
+        - AttributeName: "flight_number"
+          AttributeType: "S"
+        - AttributeName: "id"
+          AttributeType: "S"
+      KeySchema:
+        - AttributeName: "flight_number"
+          KeyType: "HASH"
+        - AttributeName: "id"
+          KeyType: "RANGE"
+      BillingMode: PAY_PER_REQUEST
+      ProvisionedThroughput:
+        ReadCapacityUnits: 0
+        WriteCapacityUnits: 0
+Outputs:  
+  DDBTableName:
+    Value: !Ref ProjectBagCheckTable

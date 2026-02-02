@@ -1,0 +1,31 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Project | Flight Event SNS Processor
+Parameters:
+  ProjectFlightEventTopic: # TODO: Add a default value or find a way to pass this parameter via the CLI
+    Type: String
+  ProjectBagCheckTable:
+    Type: String
+    Default: project_checked_bags
+Resources:
+  FlightEventProcessorLambdaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: Project_Flight_Event_Processor_Function
+      Runtime: python3.11
+      Handler: src.app.handler
+      CodeUri: ./
+      MemorySize: 128
+      Timeout: 30
+      Environment:
+        Variables:
+          DDB_TABLE: !Ref ProjectBagCheckTable
+      Events:
+         FlightEventSnsTopic:
+          Type: SNS
+          # TODO: Check https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-property-function-eventsource.html
+          # for appropriate way to reference an existing SNS Topic
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName:
+              !Ref ProjectBagCheckTable

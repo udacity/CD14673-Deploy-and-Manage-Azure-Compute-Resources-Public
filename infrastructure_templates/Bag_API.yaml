@@ -1,0 +1,110 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Project | BAG Data API
+Parameters:
+  ProjectBagCheckTable:
+    Type: String
+Resources:
+  ApiGatewayApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: Prod
+      Cors:
+        AllowMethods: "'POST, GET'"
+        AllowHeaders: "'X-Forwarded-For'"
+        AllowOrigin: "'*'"
+        AllowCredentials: false
+  GetBagsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src.app.get_bags_handler
+      Runtime: python3.11
+      Timeout: 120
+      CodeUri: ./
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /bags
+            Method: get
+            RestApiId: !Ref ApiGatewayApi
+
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName:
+              !Ref ProjectBagCheckTable
+  GetBagFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src.app.get_bag_handler
+      Runtime: python3.11
+      Timeout: 120
+      CodeUri: ./
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /flight/{flight_number}/bag/{bag_id}
+            Method: get
+            RestApiId: !Ref ApiGatewayApi
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName:
+              !Ref ProjectBagCheckTable
+  DashboardFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src.app.dashboard_handler
+      Runtime: python3.11
+      Timeout: 120
+      CodeUri: ./
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /dashboard
+            Method: get
+            RestApiId: !Ref ApiGatewayApi
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName:
+              !Ref ProjectBagCheckTable
+  GetFlightFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src.app.get_flight_handler
+      Runtime: python3.11
+      Timeout: 120
+      CodeUri: ./
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /flight/{flight_number}
+            Method: get
+            RestApiId: !Ref ApiGatewayApi
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName:
+              !Ref ProjectBagCheckTable
+  GetBagWaitTimeFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src.app.get_wait_time_handler
+      Runtime: python3.11
+      Timeout: 120
+      CodeUri: ./
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /wait/{code}
+            Method: get
+            RestApiId: !Ref ApiGatewayApi
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName:
+              !Ref ProjectBagCheckTable
+Outputs:
+  APIEndpoint:
+    Value: !Sub "https://${ApiGatewayApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/"

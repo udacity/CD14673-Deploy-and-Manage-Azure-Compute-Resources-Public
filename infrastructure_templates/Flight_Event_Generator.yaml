@@ -1,0 +1,33 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Project | Flight Event Generator
+Resources:
+  FlightEventTopic:
+      Type: AWS::SNS::Topic
+      Properties:
+        DisplayName: 'Project_Flight_Event_Topic'
+  FlightEventGeneratorLambdaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: Project_Flight_Event_Generator_Function
+      Runtime: python3.11
+      Handler: src.app.handler
+      CodeUri: ./
+      MemorySize: 128
+      Timeout: 30
+      Environment:
+        Variables:
+          SNS_TOPIC: !Ref FlightEventTopic
+      Events:
+         EveryMinFlightGenEvent:
+          Type: ScheduleV2
+          Properties:
+            ScheduleExpression: rate(1 minute)
+            State: ENABLED
+      Policies:
+        - SNSPublishMessagePolicy:
+            TopicName:
+              !GetAtt FlightEventTopic.TopicName
+Outputs:
+  SNSTopicArn:
+    Value: !Ref FlightEventTopic

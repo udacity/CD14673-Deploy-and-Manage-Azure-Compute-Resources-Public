@@ -1,0 +1,20 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Project | Bag Handler (flaky) API
+Resources:
+  GetBagsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src.app.request_bag_handler
+      Runtime: python3.11
+      Timeout: 300
+      CodeUri: ./
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /handler
+            Method: post
+Outputs:
+  APIEndpoint:
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/"

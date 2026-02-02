@@ -1,0 +1,246 @@
+<html>
+
+<head>
+    <title>Bagcheck Project Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="jquery-4.0.0.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.datatables.net/2.3.6/css/dataTables.dataTables.min.css" />
+    <script src="https://cdn.datatables.net/2.3.6/js/dataTables.min.js"></script>
+    <style type="text/tailwindcss">
+        @theme {
+        --color-clifford: #da373d;
+      }
+    </style>
+    <style type="text/css">
+        .custom-loader {
+            width: 50px;
+            height: 50px;
+            margin-left: auto;
+            margin-right: auto;
+            --c: radial-gradient(farthest-side, #766DF4 92%, #0000);
+            background:
+                var(--c) 50% 0,
+                var(--c) 50% 100%,
+                var(--c) 100% 50%,
+                var(--c) 0 50%;
+            background-size: 12px 12px;
+            background-repeat: no-repeat;
+            animation: s7 1s infinite;
+        }
+
+        @keyframes s7 {
+            to {
+                transform: rotate(.5turn)
+            }
+        }
+    </style>
+    <script lang="javascript">
+        var __API_ENDPOINT = "https://w2n7xancyb.execute-api.us-east-2.amazonaws.com/Prod/"
+
+        // Helper to add hours to our time display
+        function addHours(hours) {
+            var date = new Date()
+            date.setHours(date.getHours() + hours);
+            return date
+        }
+
+        // 2. Function to create the table
+        function createTableFromJson(data, containerId) {
+            const container = document.getElementById(containerId);
+            if (!container || !Array.isArray(data) || data.length === 0) {
+                console.error("Invalid data or container not found.");
+                return;
+            }
+
+            // Create table element and body
+            const table = document.createElement("table");
+            table.id = "bag_table"
+            const tbody = document.createElement("tbody");
+
+            // 3. Create table header
+            const headers = Object.keys(data[0]);
+            const thead = document.createElement("thead");
+            const headerRow = document.createElement("tr");
+
+            headers.forEach(headerText => {
+                const th = document.createElement("th");
+                th.textContent = headerText;
+                headerRow.appendChild(th);
+            });
+            thead.appendChild(headerRow);
+            table.appendChild(thead);
+
+            // 4. Create table rows
+            data.forEach(item => {
+                const row = document.createElement("tr");
+                headers.forEach(header => {
+                    const cell = document.createElement("td");
+                    cell.textContent = item[header];
+                    row.appendChild(cell);
+                });
+                tbody.appendChild(row);
+            });
+
+            // Append body to table and table to container
+            table.appendChild(tbody);
+            container.appendChild(table);
+        }
+
+        // 5. Call the function
+
+        // Helper to get data
+        // and recursively refresh it on a timer
+        function get(path, callback) {
+            $.ajax({
+                url: __API_ENDPOINT + path,
+                method: "GET",
+                dataType: "json"
+            }).done(function (data) {
+                callback(data);
+            }).fail(function (jqXHR, textStatus, errorThrown) {
+                console.error("Request failed:", textStatus, errorThrown);
+            }).always(function () {
+                setTimeout(function () {
+                    get(path, callback)
+                }, 5000);
+            });
+        }
+
+        // Run when document ready
+        document.addEventListener("DOMContentLoaded", function (event) {
+
+            $.extend($.fn.dataTable.defaults, {
+                searching: false,
+                ordering: false
+            });
+
+            var today = new Date().toLocaleDateString();
+            var time = new Date().toLocaleTimeString();
+            var timePlus5 = addHours(5).toLocaleTimeString()
+            var timePlus8 = addHours(8).toLocaleTimeString()
+
+            // Populate time
+            document.getElementById('dfw_time').innerHTML = today + " " + time;
+            document.getElementById('ord_time').innerHTML = today + " " + timePlus5;
+            document.getElementById('bos_time').innerHTML = today + " " + timePlus8;
+
+
+            //Wait time
+            get("wait/bos", function (data) {
+                document.getElementById('wait').innerHTML = "Average wait time in BOS: " + data.toString() + " Minutes" + "<br><small>Current Time: " + time + "</small>"
+
+            })
+
+
+
+            //Setup table
+            get("/bags", function (data) {
+                var formattedRows = [];
+                for (row of data) {
+                    if (row.current_location.code == 'bos' && row.checked_in) {
+                        now = new Date()
+                        updated = new Date(row.updated)
+                        delta = Math.round(Math.abs((now - updated) / 60000));
+                        formattedRows.push({
+                            Customer: row.customer.first_name + " " + row.customer.last_name,
+                            "Wait Time (minutes)": delta,
+                            "Flight Arrival": new Date(row.updated).toLocaleDateString() + " " + new Date(row.updated).toLocaleTimeString(),
+                            "Bag ID": row.id.substring(0, 20) + "..."
+                        })
+                    }
+                }
+                if (formattedRows.length == 0) {
+                    document.getElementById("table-container").innerHTML = "All bags currently unloaded!";
+                }
+                else {
+                    document.getElementById("table-container").innerHTML = "";
+                    createTableFromJson(formattedRows, "table-container");
+                    new DataTable('#bag_table', {
+                        paging: false
+                    });
+                }
+
+            });
+
+            //Setup dashboard display
+            get("dashboard", function (data) {
+                if (data.dfw) {
+                    document.getElementById('dfw_cnt').innerHTML = data.dfw
+                }
+                if (data.ord) {
+                    document.getElementById('ord_cnt').innerHTML = data.ord ? data.ord : 0
+                }
+                if (data.bos) {
+                    document.getElementById('bos_cnt').innerHTML = data.bos ?? 0
+                }
+
+            })
+        })
+
+    </script>
+</head>
+
+<body class="text-gray-800 bg-indigo-50">
+    <section class="mx-auto w-full bg-indigo-600 font-bold text-white p-3">
+        <h1 class="mx-auto text-center"><span id="wait">
+                <div class="custom-loader"></div>
+            </span></h1>
+    </section>
+    <section id="FlightStatus" class="pt-7 pb-3 mx-auto bg-white">
+        <div class="mx-auto max-w-5xl">
+            <h1 class="mb-10 font-bold text-lg">Bags in transit</h1>
+            <ol
+                class="relative flex gap-x-15 before:absolute before:mt-2 before:h-0.5 before:w-full before:max-w-5xl before:rounded-full before:bg-gray-200">
+                <li class="relative -mt-1.5">
+                    <span class="block size-10 rounded-full bg-gray-600 text-white font-bold mx-auto text-center pt-2"
+                        id="dfw_cnt">0</span>
+
+                    <div class="mt-4">
+                        <time class="text-xs/none font-medium text-gray-700" id="dfw_time"></time>
+
+                        <h3 class="text-lg font-bold text-gray-900">DFW</h3>
+
+                        <p class="mt-0.5 text-sm text-gray-700">Origin</p>
+                    </div>
+                </li>
+
+                <li class="relative -mt-1.5">
+                    <span class="block size-10 rounded-full bg-gray-600 text-white font-bold mx-auto text-center pt-2"
+                        id="ord_cnt">0</span>
+
+                    <div class="mt-4">
+                        <time class="text-xs/none font-medium text-gray-700" id="ord_time"></time>
+
+                        <h3 class="text-lg font-bold text-gray-900">ORD</h3>
+
+                        <p class="mt-0.5 text-sm text-gray-700">Layover</p>
+                    </div>
+                </li>
+
+                <li class="relative -mt-1.5">
+                    <span class="block size-10 rounded-full bg-indigo-500 text-white font-bold mx-auto text-center pt-2"
+                        id="bos_cnt">0</span>
+
+                    <div class="mt-4">
+                        <time class="text-xs/none font-medium text-gray-700" id="bos_time"></time>
+
+                        <h3 class="text-lg font-bold text-gray-900">BOS</h3>
+
+                        <p class="mt-0.5 text-sm text-gray-700">Destination</p>
+                    </div>
+                </li>
+            </ol>
+        </div>
+    </section>
+    <section class="mx-auto w-full  mt-10 text-sm">
+        <div class="mx-auto max-w-5xl">
+            <h1 class="mb-5 font-bold text-lg">Bags pending unloading in BOS</h1>
+            <div id="table-container" class="">
+                <div class="custom-loader"></div>
+            </div>
+        </div>
+    </section>
+
+</body>
+
+</html>

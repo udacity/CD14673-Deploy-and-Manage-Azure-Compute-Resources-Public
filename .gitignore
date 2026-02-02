@@ -1,2 +1,10 @@
+dist
+state/*.json
+.pytest_cache
+lib
+bin
+__pycache__
+.aws-sam
 .DS_Store
+*.zip
 .vscode

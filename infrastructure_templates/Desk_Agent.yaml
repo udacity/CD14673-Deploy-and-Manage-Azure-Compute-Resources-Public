@@ -1,0 +1,98 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Project | Desk Agent Bag Data Generator
+Resources:
+  DeskAgentLambdaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: Project_Desk_Agent_Function
+      Runtime: python3.11
+      Handler: src.app.handler
+      CodeUri: ./
+      MemorySize: 128
+      Timeout: 30
+      Environment:
+        Variables:
+          API_ENDPOINT: !Sub https://${SQSInterfaceAPI}.execute-api.${AWS::Region}.amazonaws.com/prod/bagcheck
+      Events:
+         EveryMinDeskAgentEvent:
+          Type: ScheduleV2
+          Properties:
+            ScheduleExpression: rate(1 minute)
+            State: ENABLED # <--- DISABLED Will stop the bag check event production
+  ApiGatewaySQSRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: apigateway.amazonaws.com
+            Action: sts:AssumeRole
+      Path: /
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs
+      Policies:
+        - PolicyName: ApiGatewaySQSSendMessagePolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action: sqs:SendMessage
+                Resource: !GetAtt ProjectBagCheckQueue.Arn
+  SQSInterfaceAPI:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: project_sqs_publisher_api
+  ApiResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      ParentId: !GetAtt SQSInterfaceAPI.RootResourceId
+      PathPart: bagcheck
+      RestApiId: !Ref SQSInterfaceAPI
+  ApiMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      AuthorizationType: NONE
+      HttpMethod: POST
+      ResourceId: !Ref ApiResource
+      RestApiId: !Ref SQSInterfaceAPI
+      MethodResponses:
+        - StatusCode: 200
+      Integration:
+        Type: AWS
+        IntegrationHttpMethod: POST # SQS API uses POST
+        Credentials: !GetAtt ApiGatewaySQSRole.Arn
+        Uri: !Sub arn:aws:apigateway:${AWS::Region}:sqs:path/${AWS::AccountId}/${ProjectBagCheckQueue.QueueName}
+        RequestParameters:
+          # Map the request body from the method to the SQS message body
+          integration.request.header.Content-Type: "'application/x-amz-json-1.0'"
+          integration.request.header.X-Amz-Target: "'AmazonSQS.SendMessage'"
+        RequestTemplates:
+          'application/json': !Sub |
+            { 
+              "MessageBody": "$util.escapeJavaScript($input.json('$'))",
+              "QueueUrl": "https://sqs.${AWS::Region}.amazonaws.com/${AWS::AccountId}/${ProjectBagCheckQueue.QueueName}"
+            }
+        PassthroughBehavior: NEVER
+        IntegrationResponses:
+          - StatusCode: 200
+  ApiDeployment:
+    Type: AWS::ApiGateway::Deployment
+    DependsOn:
+      - ApiMethod
+    Properties:
+      RestApiId: !Ref SQSInterfaceAPI
+      StageName: prod
+  ProjectBagCheckQueue:
+    Type: 'AWS::SQS::Queue'
+    Properties:
+      QueueName: "Project_Bag_Check_Queue"
+Outputs:
+  SQSQueueName: 
+    Value: !GetAtt ProjectBagCheckQueue.QueueName
+  SQSQueueArn: 
+    Value: !GetAtt ProjectBagCheckQueue.Arn
+  ApiEndpoint:
+    Value: !Sub https://${SQSInterfaceAPI}.execute-api.${AWS::Region}.amazonaws.com/prod/bagcheck

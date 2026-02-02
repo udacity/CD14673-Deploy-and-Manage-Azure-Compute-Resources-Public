@@ -1,0 +1,40 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: A SAM template to host a static website on S3.
+
+Resources:
+  WebsiteBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      WebsiteConfiguration:
+        IndexDocument: index.html
+        ErrorDocument: index.html
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: false
+        BlockPublicPolicy: false
+        IgnorePublicAcls: false
+        RestrictPublicBuckets: false
+  WebsiteBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref WebsiteBucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: PublicReadGetObject
+            Effect: Allow
+            Principal: '*'
+            Action: s3:GetObject
+            Resource: !Join
+              - ''
+              - - 'arn:aws:s3:::'
+                - !Ref WebsiteBucket
+                - '/*'
+
+Outputs:
+  WebsiteURL:
+    Description: "The URL of the static website"
+    Value: !GetAtt WebsiteBucket.WebsiteURL
+  BucketName:
+    Description: "The name of the S3 bucket"
+    Value: !Ref WebsiteBucket
