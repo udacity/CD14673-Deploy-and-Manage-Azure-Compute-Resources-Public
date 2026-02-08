@@ -1,0 +1,42 @@
+{
+  "order_id": "ORD-2026-001-A",
+  "customer": {
+    "name": "Sarah Mitchell",
+    "email": "sarah.mitchell@example.com",
+    "phone": "+1-555-0123"
+  },
+  "origin_address": {
+    "warehouse_name": "Western Distribution Center",
+    "street_address": "1500 Commerce Boulevard",
+    "city": "Portland",
+    "state": "Oregon",
+    "postal_code": "97201",
+    "country": "USA"
+  },
+  "destination_address": {
+    "recipient": "Sarah Mitchell",
+    "street_address": "742 Evergreen Terrace",
+    "apartment": "Apt 4B",
+    "city": "Seattle",
+    "state": "Washington",
+    "postal_code": "98101",
+    "country": "USA"
+  },
+  "items": [
+    {
+      "product_id": "PROD-8821",
+      "description": "Wireless Bluetooth Headphones",
+      "quantity": 1,
+      "unit_price": 89.99
+    },
+    {
+      "product_id": "PROD-4432",
+      "description": "USB-C Charging Cable",
+      "quantity": 2,
+      "unit_price": 12.99
+    }
+  ],
+  "order_date": "2026-02-01T14:30:00Z",
+  "shipping_method": "standard",
+  "total_amount": 115.97
+}

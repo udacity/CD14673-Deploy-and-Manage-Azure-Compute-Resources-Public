@@ -1,0 +1,46 @@
+{
+  "order_id": "ABC-123-DEF-456",
+  "purchaser": {
+    "full_name": "Emily Rodriguez",
+    "contact": {
+      "primary_phone": "555-987-6543",
+      "email_address": "emily.r@homemail.net"
+    }
+  },
+  "shipment": {
+    "src": {
+      "location_type": "warehouse",
+      "facility_id": "WH-SOUTH-01",
+      "address": {
+        "line1": "9900 Distribution Way",
+        "line2": null,
+        "municipality": "Austin",
+        "region": "TX",
+        "zip_code": "78701",
+        "nation": "US"
+      }
+    },
+    "dst": {
+      "contact_name": "Emily Rodriguez",
+      "address": {
+        "line1": "1234 Oak Street",
+        "line2": "Unit 12",
+        "municipality": "Denver",
+        "region": "CO",
+        "zip_code": "80202",
+        "nation": "US"
+      }
+    },
+    "service_level": "2-day"
+  },
+  "line_items": [
+    {
+      "sku": "HOME-DECOR-991",
+      "name": "Decorative Wall Mirror",
+      "qty": 1,
+      "price": 149.99
+    }
+  ],
+  "timestamp": "2026-02-03T09:15:22Z",
+  "grand_total": 149.99
+}
