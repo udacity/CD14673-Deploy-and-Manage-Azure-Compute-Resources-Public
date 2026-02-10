@@ -43,6 +43,16 @@ Resources:
         AllowMethods: "'GET,POST,PUT,DELETE,OPTIONS'"
         AllowHeaders: "'Content-Type'"
         AllowOrigin: "'*'"
+  
+  CouponApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: prod
+      Cors:
+        AllowMethods: "'GET,POST,PUT,DELETE,OPTIONS'"
+        AllowHeaders: "'Content-Type'"
+        AllowOrigin: "'*'"
+  
 
   CartFunction:
     Type: AWS::Serverless::Function
@@ -83,6 +93,21 @@ Resources:
             RestApiId: !Ref ShoppingApi
             Path: /cart/{itemId}
             Method: DELETE
+  CouponFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/coupon/
+      Handler: app.lambda_handler
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref CartTable
+      Events:
+        GetCouponForItem:
+          Type: Api
+          Properties:
+            RestApiId: !Ref CouponApi
+            Path: /item/{item}
+            Method: GET
 
   CartTable:
     Type: AWS::Serverless::SimpleTable
@@ -101,3 +126,6 @@ Outputs:
   ApiBaseUrl:
     Description: API Gateway base URL
     Value: !Sub 'https://${ShoppingApi}.execute-api.${AWS::Region}.amazonaws.com/prod'
+  CouponApiBaseUrl:
+    Description: Coupon API Gateway base URL
+    Value: !Sub 'https://${CouponApi}.execute-api.${AWS::Region}.amazonaws.com/prod/item/'

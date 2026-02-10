@@ -22,3 +22,6 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 EOF
 aws s3 sync ./frontend s3://${bucket_name}
+
+echo "Deployment Complete"
+sam list stack-outputs --stack-name udshopping
