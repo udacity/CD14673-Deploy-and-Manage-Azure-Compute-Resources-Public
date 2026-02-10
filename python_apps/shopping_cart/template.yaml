@@ -1,0 +1,103 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Globals:
+  Function:
+    Runtime: python3.11
+    Timeout: 10
+    MemorySize: 128
+    Environment:
+      Variables:
+        TABLE_NAME: !Ref CartTable
+Resources:
+  WebAppBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      WebsiteConfiguration:
+        IndexDocument: index.html
+        ErrorDocument: index.html
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: false
+        BlockPublicPolicy: false
+        IgnorePublicAcls: false
+        RestrictPublicBuckets: false
+
+  WebAppBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref WebAppBucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: PublicReadGetObject
+            Effect: Allow
+            Principal: '*'
+            Action:
+              - s3:GetObject
+            Resource: !Sub '${WebAppBucket.Arn}/*'
+
+  ShoppingApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: prod
+      Cors:
+        AllowMethods: "'GET,POST,PUT,DELETE,OPTIONS'"
+        AllowHeaders: "'Content-Type'"
+        AllowOrigin: "'*'"
+
+  CartFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/cart/
+      Handler: app.lambda_handler
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref CartTable
+      Events:
+        ListProducts:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ShoppingApi
+            Path: /products
+            Method: GET
+        GetCart:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ShoppingApi
+            Path: /cart
+            Method: GET
+        AddToCart:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ShoppingApi
+            Path: /cart
+            Method: POST
+        UpdateCart:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ShoppingApi
+            Path: /cart/{itemId}
+            Method: PUT
+        DeleteFromCart:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ShoppingApi
+            Path: /cart/{itemId}
+            Method: DELETE
+
+  CartTable:
+    Type: AWS::Serverless::SimpleTable
+    Properties:
+      PrimaryKey:
+        Name: itemId
+        Type: String
+
+Outputs:
+  WebsiteBucketName:
+    Description: S3 bucket name for the static website
+    Value: !Ref WebAppBucket
+  WebsiteURL:
+    Description: S3 static website URL
+    Value: !GetAtt WebAppBucket.WebsiteURL
+  ApiBaseUrl:
+    Description: API Gateway base URL
+    Value: !Sub 'https://${ShoppingApi}.execute-api.${AWS::Region}.amazonaws.com/prod'

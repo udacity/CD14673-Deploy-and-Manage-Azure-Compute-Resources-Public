@@ -1,0 +1,32 @@
+#!/usr/bin/env python3
+
+import json
+import sys
+
+'''
+This helper CLI reads outputs from the SAM CLI "stack list outputs" command.
+It then prints the value of the specified output.
+
+Example:
+
+read_stack_outputs ./state/project-bag-check-processor.json SQSQueueUrl
+
+'''
+def main():
+    # sys.argv will be ['greet.py', 'Hello', 'World']
+    if len(sys.argv) == 3:
+        path = sys.argv[1]
+        key = sys.argv[2]
+        with open(path, 'r', encoding='utf-8') as file:
+            json_data = json.load(file)
+            for entry in json_data:
+                if entry['OutputKey'] == key:
+                    sys.stdout.write(entry['OutputValue'])
+                    sys.stdout.flush()
+                    sys.exit(0)
+        sys.exit(2)
+    else:
+        print("Usage: read_stack_outputs {file} {key}")
+        sys.exit(1)
+if __name__ == "__main__":
+    main()
