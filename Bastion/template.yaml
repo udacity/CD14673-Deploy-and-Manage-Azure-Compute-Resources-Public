@@ -129,6 +129,14 @@ Resources:
           # Verify installation
           sam --version
 
+          # Install docker
+          amazon-linux-extras install docker -y
+          service docker start
+          groupadd docker
+          usermod -a -G docker ec2-user
+          usermod -a -G docker ssm-user
+
+
           # Clean up
           rm -rf aws-sam-cli-linux-x86_64.zip sam-installation
       Tags:
