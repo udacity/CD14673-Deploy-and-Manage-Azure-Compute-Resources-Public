@@ -1,0 +1,146 @@
+[
+    {
+        "replyId": "rpl-3001",
+        "originalMessageId": "msg-5001",
+        "userId": "u-101",
+        "username": "nova",
+        "replyText": "I’m in, what time?",
+        "timestamp": "2026-02-01T09:10:05Z",
+        "reactions": 3
+    },
+    {
+        "replyId": "rpl-3002",
+        "originalMessageId": "msg-5001",
+        "userId": "u-118",
+        "username": "renee",
+        "replyText": "After 6 works for me.",
+        "timestamp": "2026-02-01T09:12:17Z",
+        "reactions": 2
+    },
+    {
+        "replyId": "rpl-3003",
+        "originalMessageId": "msg-5001",
+        "userId": "u-125",
+        "username": "sam",
+        "replyText": "Let’s do 6:30.",
+        "timestamp": "2026-02-01T09:15:22Z",
+        "reactions": 4
+    },
+    {
+        "replyId": "rpl-3004",
+        "originalMessageId": "msg-5002",
+        "userId": "u-109",
+        "username": "marco",
+        "replyText": "Got the files, thanks!",
+        "timestamp": "2026-02-01T10:05:41Z",
+        "reactions": 1
+    },
+    {
+        "replyId": "rpl-3005",
+        "originalMessageId": "msg-5002",
+        "userId": "u-111",
+        "username": "priya",
+        "replyText": "Can you add the latest draft?",
+        "timestamp": "2026-02-01T10:06:55Z",
+        "reactions": 1
+    },
+    {
+        "replyId": "rpl-3006",
+        "originalMessageId": "msg-5003",
+        "userId": "u-130",
+        "username": "mila",
+        "replyText": "Congrats on the launch!",
+        "timestamp": "2026-02-01T11:00:09Z",
+        "reactions": 5
+    },
+    {
+        "replyId": "rpl-3007",
+        "originalMessageId": "msg-5003",
+        "userId": "u-107",
+        "username": "aria",
+        "replyText": "Well deserved 🎉",
+        "timestamp": "2026-02-01T11:02:44Z",
+        "reactions": 4
+    },
+    {
+        "replyId": "rpl-3008",
+        "originalMessageId": "msg-5003",
+        "userId": "u-116",
+        "username": "june",
+        "replyText": "So proud of the team.",
+        "timestamp": "2026-02-01T11:05:18Z",
+        "reactions": 6
+    },
+    {
+        "replyId": "rpl-3009",
+        "originalMessageId": "msg-5004",
+        "userId": "u-140",
+        "username": "dev",
+        "replyText": "On my way.",
+        "timestamp": "2026-02-01T12:30:26Z",
+        "reactions": 2
+    },
+    {
+        "replyId": "rpl-3010",
+        "originalMessageId": "msg-5004",
+        "userId": "u-133",
+        "username": "sabrina",
+        "replyText": "Need me to bring snacks?",
+        "timestamp": "2026-02-01T12:31:50Z",
+        "reactions": 1
+    },
+    {
+        "replyId": "rpl-3011",
+        "originalMessageId": "msg-5005",
+        "userId": "u-103",
+        "username": "zane",
+        "replyText": "Quiet day, just checking in.",
+        "timestamp": "2026-02-01T13:40:07Z",
+        "reactions": 0
+    },
+    {
+        "replyId": "rpl-3012",
+        "originalMessageId": "msg-5006",
+        "userId": "u-122",
+        "username": "leah",
+        "replyText": "Shared the doc in the channel.",
+        "timestamp": "2026-02-01T14:05:23Z",
+        "reactions": 2
+    },
+    {
+        "replyId": "rpl-3013",
+        "originalMessageId": "msg-5006",
+        "userId": "u-114",
+        "username": "elliot",
+        "replyText": "Thanks, I’ll review tonight.",
+        "timestamp": "2026-02-01T14:06:32Z",
+        "reactions": 1
+    },
+    {
+        "replyId": "rpl-3014",
+        "originalMessageId": "msg-5006",
+        "userId": "u-121",
+        "username": "jules",
+        "replyText": "Added comments on page 3.",
+        "timestamp": "2026-02-01T14:08:19Z",
+        "reactions": 1
+    },
+    {
+        "replyId": "rpl-3015",
+        "originalMessageId": "msg-5007",
+        "userId": "u-136",
+        "username": "omar",
+        "replyText": "Only one quick update here.",
+        "timestamp": "2026-02-01T15:01:12Z",
+        "reactions": 0
+    },
+    {
+        "replyId": "rpl-3016",
+        "originalMessageId": "msg-5001",
+        "userId": "u-102",
+        "username": "kai",
+        "replyText": "6:30 works for me too.",
+        "timestamp": "2026-02-01T15:20:33Z",
+        "reactions": 2
+    }
+]
