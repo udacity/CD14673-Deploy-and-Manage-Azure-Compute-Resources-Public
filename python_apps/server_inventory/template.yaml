@@ -1,0 +1,27 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: SAM template for a Lambda function using src/app.lambda_handler
+
+Resources:
+  AppFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/lambda/
+      Handler: app.lambda_handler
+      Runtime: python3.11
+      Timeout: 30
+      MemorySize: 128
+      Policies:
+        - DynamoDBCrudPolicy:
+          TableName: !Ref L4InventoryTable
+  L4InventoryTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: l4Inventory
+      AttributeDefinitions:
+        - AttributeName: serverName
+          AttributeType: S
+      KeySchema:
+        - AttributeName: serverName
+          KeyType: HASH
+      BillingMode: PAY_PER_REQUEST
