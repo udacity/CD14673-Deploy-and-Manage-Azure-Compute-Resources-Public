@@ -1,6 +1,6 @@
 import requests
 import logging
-from retry.api import retry_call
+from retry.api import retry, retry_call
 
 # Some basic logging setup
 logging.basicConfig(level=logging.INFO,
@@ -11,6 +11,7 @@ logging.basicConfig(level=logging.INFO,
 # to help simulate a flaky endpoint that fails a few times before succeeding
 attempts = 0
 
+@retry(tries=5, delay=1, backoff=2)
 def flaky_get():
     global attempts
     attempts += 1
@@ -30,7 +31,7 @@ def flaky_get():
 
 if __name__ == "__main__":
     try:
-        result = retry_call(flaky_get, tries=5, delay=2)
+        result = flaky_get()
         logging.info("Request succeeded")
         logging.info(f"Total attempts: {attempts}")
     except Exception as e:
