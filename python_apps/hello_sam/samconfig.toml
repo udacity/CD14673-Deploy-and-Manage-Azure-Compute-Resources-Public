@@ -1,0 +1,10 @@
+version = 0.1
+
+[default]
+[default.global]
+[default.global.parameters]
+stack_name = "hello-sam"
+
+[default.sync]
+[default.sync.parameters]
+watch = true

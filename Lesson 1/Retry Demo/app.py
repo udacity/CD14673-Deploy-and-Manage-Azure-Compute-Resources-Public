@@ -11,7 +11,7 @@ logging.basicConfig(level=logging.INFO,
 # to help simulate a flaky endpoint that fails a few times before succeeding
 attempts = 0
 
-@retry(tries=5, delay=1, backoff=2)
+@retry(tries=5, delay=1, backoff=2, jitter=(0, 5))
 def flaky_get():
     global attempts
     attempts += 1
