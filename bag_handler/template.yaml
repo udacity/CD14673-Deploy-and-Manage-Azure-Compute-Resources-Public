@@ -1,26 +1,30 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: Project | Flight Event SNS Processor
+Description: Project | Bag Handler Integration (retry with backoff)
 Parameters:
-  ProjectFlightEventTopic:
-    Type: String
-    Default: arn:aws:sns:us-east-1:577638382580:project-flight-event-generator-FlightEventTopic-3f5H6S9AE7HD
   ProjectBagCheckTable:
     Type: String
     Default: project_checked_bags
+  BagHandlerApiUrl:
+    Type: String
+    Default: https://0viq2lyhph.execute-api.us-east-1.amazonaws.com/Prod
+  ProjectFlightEventTopic:
+    Type: String
+    Default: arn:aws:sns:us-east-1:577638382580:project-flight-event-generator-FlightEventTopic-3f5H6S9AE7HD
 Resources:
-  FlightEventProcessorLambdaFunction:
+  BagHandlerFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: Project_Flight_Event_Processor_Function
+      FunctionName: Project_Bag_Handler_Function
       Runtime: python3.11
       Handler: src.app.handler
       CodeUri: ./
       MemorySize: 128
-      Timeout: 30
+      Timeout: 300
       Environment:
         Variables:
           DDB_TABLE: !Ref ProjectBagCheckTable
+          BAG_HANDLER_URL: !Ref BagHandlerApiUrl
       Events:
         FlightEventSnsTopic:
           Type: SNS
@@ -28,5 +32,4 @@ Resources:
             Topic: !Ref ProjectFlightEventTopic
       Policies:
         - DynamoDBCrudPolicy:
-            TableName:
-              !Ref ProjectBagCheckTable
+            TableName: !Ref ProjectBagCheckTable

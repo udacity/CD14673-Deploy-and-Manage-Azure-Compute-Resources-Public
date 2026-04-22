@@ -1,18 +1,15 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: Project | Flight Event SNS Processor
+Description: Project | Bag Check Processor (SQS to DynamoDB)
 Parameters:
-  ProjectFlightEventTopic:
-    Type: String
-    Default: arn:aws:sns:us-east-1:577638382580:project-flight-event-generator-FlightEventTopic-3f5H6S9AE7HD
   ProjectBagCheckTable:
     Type: String
     Default: project_checked_bags
 Resources:
-  FlightEventProcessorLambdaFunction:
+  BagProcessorFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: Project_Flight_Event_Processor_Function
+      FunctionName: Project_Bag_Processor_Function
       Runtime: python3.11
       Handler: src.app.handler
       CodeUri: ./
@@ -22,11 +19,11 @@ Resources:
         Variables:
           DDB_TABLE: !Ref ProjectBagCheckTable
       Events:
-        FlightEventSnsTopic:
-          Type: SNS
+        SQSEvent:
+          Type: SQS
           Properties:
-            Topic: !Ref ProjectFlightEventTopic
+            Queue: arn:aws:sqs:us-east-1:577638382580:Project_Bag_Check_Queue
+            BatchSize: 10
       Policies:
         - DynamoDBCrudPolicy:
-            TableName:
-              !Ref ProjectBagCheckTable
+            TableName: !Ref ProjectBagCheckTable

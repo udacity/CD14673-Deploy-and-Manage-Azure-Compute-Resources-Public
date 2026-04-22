@@ -1,0 +1,37 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Project | DLQ Processor (moves failed messages to long-term storage)
+Resources:
+  DeadLettersTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: project_dead_letters
+      AttributeDefinitions:
+        - AttributeName: message_id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: message_id
+          KeyType: HASH
+      BillingMode: PAY_PER_REQUEST
+
+  DLQProcessorFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: Project_DLQ_Processor_Function
+      Runtime: python3.11
+      Handler: src.app.handler
+      CodeUri: ./
+      MemorySize: 128
+      Timeout: 30
+      Environment:
+        Variables:
+          DLQ_TABLE: project_dead_letters
+      Events:
+        DLQEvent:
+          Type: SQS
+          Properties:
+            Queue: arn:aws:sqs:us-east-1:577638382580:Project_Bag_Check_DLQ
+            BatchSize: 10
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: project_dead_letters
